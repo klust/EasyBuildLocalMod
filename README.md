@@ -36,16 +36,16 @@ directories or through the modules that load a particular version of the softwar
 
 ### EasyBuild-production
 
-  * EASYBUILD_SYSTEM_PREFIX: Directory where EasyBuild searches for the system config
+  * EBU_SYSTEM_PREFIX: Directory where EasyBuild searches for the system config
     files and puts its repo directory.
     The default value is /apps/antwerpen/easybuild.
-  * EASYBUILD_INSTALL_PREFIX: Prefix for the directories where EasyBuild will put
+  * EBU_INSTALL_PREFIX: Prefix for the directories where EasyBuild will put
     binaries and modules.
 
 Directories: The structure is a compromise between what EESSI does and what has been
 done in the past at UAntwerpen to not make the changes too big.
 
-  * Software packages: ``$EASYBUILD_INSTALL_PREFIX/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$CALCUA_ARCHSPEC_TARGET``
+  * Software packages: ``$EBU_INSTALL_PREFIX/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$CALCUA_ARCHSPEC_TARGET``
 
     In principle we could have gone for additional levels in the directory structure
     also instead of the current approach. However, the last part of the name is rather
@@ -55,7 +55,7 @@ done in the past at UAntwerpen to not make the changes too big.
       * ``/apps/antwerpen/CalcUA-2020a/centos8-rome``
       * ``/apps/antwerpen/EESSI-2020.12/GentooPrefix-zen2``
 
-  * Modules: ``$EASYBUILD_INSTALL_PREFIX/Modules/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$CALCUA_ARCHSPEC_TARGET_COMPAT/system-$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION``
+  * Modules: ``$EBU_INSTALL_PREFIX/Modules/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$CALCUA_ARCHSPEC_TARGET_COMPAT/system-$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION``
 
     The basic idea here is not ease of maintenance (such as being able to delete
     a particular software stack with the minimal number of commands) but maximum readability
@@ -75,7 +75,7 @@ done in the past at UAntwerpen to not make the changes too big.
     to arrange should we not want to force a user to load paths for multiple classes.
     Moreover, the assignement to classes in EasyBuild seems rather arbitrary.
 
-  * System-wide configuration files of EasyBuild: ``$EASYBUILD_SYSTEM_PREFIX/config``
+  * System-wide configuration files of EasyBuild: ``$EBU_SYSTEM_PREFIX/config``
 
     As EasyBuild does not yet use the archspec database of compiler options for optimization,
     we still need to set ``optarch`` for some architectures (currently at least for
@@ -89,13 +89,13 @@ done in the past at UAntwerpen to not make the changes too big.
       * ``production.cfg`` with all the common settings for all toolchains.
       * ``production-$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION.cfg``.
 
-  * Sources are stored in $EASYBUILD_INSTALL_PREFIX/sources
+  * Sources are stored in $EBU_INSTALL_PREFIX/sources
     for compatibility with the current setup. They do in general not depend on OS,
     architecture or versions of the software stack so it is not needed to further
     distinguish between them.
 
   * The repo-directory:
-    $EASYBUILD_SYSTEM_PREFIX/repo/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$CALCUA_ARCHSPEC_TARGET_COMPAT
+    $EBU_SYSTEM_PREFIX/repo/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$CALCUA_ARCHSPEC_TARGET_COMPAT
 
     The repo directory is not used by users, and a single level makes it very easy
     to delete parts that are not needed anymore without even having to play around
@@ -108,30 +108,30 @@ done in the past at UAntwerpen to not make the changes too big.
 
 In addition to the variables needed for EasyBuild-production (which are needed here
 too to find the existing installation):
-  * EASYBUILD_USER_PREFIX: Place where to install all software. The default is
+  * EBU_USER_PREFIX: Place where to install all software. The default is
     $VSC_DATA/EasyBuild
 
 Directories: The directory again takes into account possible future extension to also
 support installation on top of EESSI should we ever roll this out on the CalcUA infrastructure.
 
-  * Software packages: ``$EASYBUILD_USER_PREFIX/Software/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$VALCUA_ARCHSPEC_TARGET``
+  * Software packages: ``$EBU_USER_PREFIX/Software/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$VALCUA_ARCHSPEC_TARGET``
 
     Examples:
       * ``/data/20z/vsc20xyz/EasyBuild/Software/CalcUA-2020a/centos8-zen2``
       * ``/data/20z/vsc20xyz/EasyBuild/Software/EESSI-2020.12/GentooPrefix-zen2``
 
-  * Modules: ``$EASYBUILD_USER_PREFIX/Modules/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$VALCUA_ARCHSPEC_TARGET/user-$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION``
+  * Modules: ``$EBU_USER_PREFIX/Modules/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$VALCUA_ARCHSPEC_TARGET/user-$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION``
 
   * User config file (if needed, by default everything will be done by environment
-    variables): $EASYBUILD_USER_PREFIX/config
+    variables): $EBU_USER_PREFIX/config
       * ``user.cfg``
       * ``user-$$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION.cfg``, content overwrites
         the former and all system config files.
 
-  * Sources are stored in ``$EASYBUILD_USER_PREFIX/Sources``
+  * Sources are stored in ``$EBU_USER_PREFIX/Sources``
 
   * The repo-directory is
-    ``$EASYBUILD_USER_PREFIX/Repo/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$CALCUA_ARCHSPEC_TARGET
+    ``$EBU_USER_PREFIX/Repo/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$CALCUA_ARCHSPEC_TARGET
 
   * The build directory: ``/dev/shm/$USER``?
 
