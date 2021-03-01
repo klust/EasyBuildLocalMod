@@ -17,9 +17,13 @@ local ebu =  'EBU'    -- Site-specific prefix for the environment variable names
 -- as generic as we would like
 --
 
-
 whatis( 'Prepares EasyBuild for installation in a user directory.' )
 
+--
+-- Avoid loading together with EasyBuild-production
+--
+
+family( 'EasyBuildConfig' )
 
 -- Make sure EasyBuild is loaded.
 -- We don't care which version is loaded but will load the default one ourselves.
@@ -38,10 +42,25 @@ if ( user_prefix    == nil ) then user_prefix    = default_user_prefix    end
 if ( system_prefix  == nil ) then system_prefix  = default_system_prefix  end
 
 local stack_name =             os.getenv( site .. '_STACK_NAME' )
+if ( ( mode() == 'load' ) and ( stack_name == nil ) ) then
+    LmodError( 'The environment variable ' .. site .. '_STACK_NAME is missing, did you load a valid software stack module?' )
+end
 local stack_version =          os.getenv( site .. '_STACK_VERSION' )
+if ( ( mode() == 'load' ) and ( stack_version == nil ) ) then
+    LmodError( 'The environment variable ' .. site .. '_STACK_VERSION is missing, did you load a valid software stack module?' )
+end
 local archspec_os =            os.getenv( site .. '_ARCHSPEC_OS' )
+if ( ( mode() == 'load' ) and ( archspec_os == nil ) ) then
+    LmodError( 'The environment variable ' .. site .. '_ARCHSPEC_OS is missing, did you load a valid software stack module?' )
+end
 local archspec_target =        os.getenv( site .. '_ARCHSPEC_TARGET' )
+if ( ( mode() == 'load' ) and ( archspec_target == nil ) ) then
+    LmodError( 'The environment variable ' .. site .. '_ARCHSPEC_TARGET is missing, did you load a valid software stack module?' )
+end
 local archspec_target_compat = os.getenv( site .. '_ARCHSPEC_TARGET_COMPAT' )
+if ( ( mode() == 'load' ) and ( archspec_target_compat == nil ) ) then
+    LmodError( 'The environment variable ' .. site .. '_ARCHSPEC_TARGET_COMPAT is missing, did you load a valid software stack module?' )
+end
 
 -- - Prepare some additional variables to reduce the length of some lines
 local stack = stack_name .. '-' .. stack_version
@@ -101,7 +120,6 @@ if isFile( systen_configfile_stack )    then table.insert( configfiles, systen_c
 if isFile( user_configfile_stack)       then table.insert( configfiles, user_configfile_stack )     end
 
 if #configfiles > 0 then
-    -- Omit the 'NOFILE,' at the front
     setenv( 'EASYBUILD_CONFIGFILES', table.concat( configfiles, ',' ) )
 end
 
