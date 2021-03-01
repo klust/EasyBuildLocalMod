@@ -20,12 +20,6 @@ local ebu =  'EBU'    -- Site-specific prefix for the environment variable names
 
 whatis( 'Prepares EasyBuild for installation in a user directory.' )
 
---
--- Packages that are needed
---
-
-lfs =  require( 'lfs' )
-
 
 -- Make sure EasyBuild is loaded.
 -- We don't care which version is loaded but will load the default one ourselves.
@@ -90,7 +84,7 @@ setenv( 'EASYBUILD_REPOSITORYPATH',       user_repositorypath )
 
 local robot_paths = {user_repositorypath, system_repositorypath}
 
-if lfs.attributes( user_easyconfigdir, 'mode' ) == 'directory' then
+if isDir( user_easyconfigdir ) then
     table.insert( robot_paths, user_easyconfigdir )
 end
 table.insert( robot_paths, system_easyconfigdir )
@@ -101,18 +95,10 @@ setenv( 'EASYBUILD_ROBOT_PATHS', table.concat( robot_paths, ':' ) )
 
 local configfiles = {}
 
-if lfs.attributes( system_configfile_generic, 'mode') == 'file' then
-    table.insert( configfiles, system_configfile_generic )
-end
-if lfs.attributes( user_configfile_generic,   'mode') == 'file' then
-    table.insert( configfiles, user_configfile_generic )
-end
-if lfs.attributes( systen_configfile_stack,   'mode') == 'file' then
-    table.insert( configfiles, systen_configfile_stack )
-end
-if lfs.attributes( user_configfile_stack,     'mode') == 'file' then
-    table.insert( configfiles, user_configfile_stack )
-end
+if isFile( system_configfile_generic )  then table.insert( configfiles, system_configfile_generic ) end
+if isFile( user_configfile_generic )    then table.insert( configfiles, user_configfile_generic )   end
+if isFile( systen_configfile_stack )    then table.insert( configfiles, systen_configfile_stack )   end
+if isFile( user_configfile_stack)       then table.insert( configfiles, user_configfile_stack )     end
 
 if #configfiles > 0 then
     -- Omit the 'NOFILE,' at the front
