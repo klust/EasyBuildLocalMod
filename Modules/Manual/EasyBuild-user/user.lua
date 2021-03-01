@@ -3,9 +3,10 @@
 -- tuned for the UAntwerp configuration
 --
 
-local default_system_prefix = '/apps/antwerpen/easybuild'
+-- User configuration
 local default_user_prefix = os.getenv( 'VSC_DATA' ) .. '/EasyBuild'
-local default_install_prefix = '/apps/antwerpen'
+-- System configuration
+local default_system_prefix = '/apps/antwerpen/easybuild'
 
 local site = 'CALCUA' -- Site-specific prefix for the environment variable names set in the software stack modules.
 local ebu =  'EBU'    -- Site-specific prefix for the environment variable names that are likely set either in the system profile or user profile.
@@ -39,7 +40,8 @@ end
 -- - Read data from the environment or initialize with default values.
 local user_prefix =    os.getenv( ebu .. '_USER_PREFIX' )
 local system_prefix =  os.getenv( ebu .. '_SYSTEM_PREFIX' )
-local install_prefix = os.getenv( ebu .. '_INSTALL_PREFIX')
+if ( user_prefix    == nil ) then user_prefix    = default_user_prefix    end
+if ( system_prefix  == nil ) then system_prefix  = default_system_prefix  end
 
 local stack_name =             os.getenv( site .. '_STACK_NAME' )
 local stack_version =          os.getenv( site .. '_STACK_VERSION' )
@@ -53,23 +55,23 @@ local archspec = archspec_os .. '-' .. archspec_target
 local archspec_compat = archspec_os .. '-' .. archspec_target_compat
 
 -- - Compute a number of paths and file names
-local user_sourcepath =           user_prefix .. '/sources'
-local user_installpath_software = user_prefix .. '/software/' .. stack .. '/' .. archspec
-local user_installpath_modules =  user_prefix .. '/modules/' .. stack .. '/' .. archspec .. '/user-' .. stack
-local user_repositorypath =       user_prefix .. '/repo/' .. stack .. '/' .. archspec
-local user_configdir =            user_prefix .. '/config/'
-local user_easyconfigdir =        user_prefix .. '/easyconfigs'
-local user_buildpath =            '/dev/shm/' .. os.getenv('USER')
+local user_sourcepath =           pathJoin( user_prefix, 'sources' )
+local user_installpath_software = pathJoin( user_prefix, 'software', stack, archspec )
+local user_installpath_modules =  pathJoin( user_prefix, 'modules',  stack, archspec, 'user-' .. stack )
+local user_repositorypath =       pathJoin( user_prefix, 'repo',     stack, archspec )
+local user_configdir =            pathJoin( user_prefix, 'config' )
+local user_easyconfigdir =        pathJoin( user_prefix, 'easyconfigs' )
+local user_buildpath =            pathJoin( '/dev/shm/', os.getenv('USER') )
 
-local user_configfile_generic = user_configdir .. 'user.cfg'
-local user_configfile_stack =   user_configdir .. 'user-' .. stack .. '.cfg'
+local user_configfile_generic =   pathJoin( user_configdir, 'user.cfg' )
+local user_configfile_stack =     pathJoin( user_configdir, 'user-' .. stack .. '.cfg' )
 
-local system_repositorypath =  system_prefix .. '/repo/' .. stack .. '/' .. archspec_compat
-local system_configdir =       system_prefix .. '/config/'
-local system_easyconfigdir =   system_prefix .. '/github/UAntwerpen-easyconfigs'
+local system_repositorypath =     pathJoin( system_prefix, 'repo', stack, archspec_compat )
+local system_configdir =          pathJoin( system_prefix, 'config' )
+local system_easyconfigdir =      pathJoin( system_prefix, 'github/UAntwerpen-easyconfigs' )
 
-local system_configfile_generic = system_configdir .. 'production.cfg'
-local systen_configfile_stack =   system_configdir .. 'production-' .. stack .. '.cfg'
+local system_configfile_generic = pathJoin( system_configdir, 'production.cfg' )
+local systen_configfile_stack =   pathJoin( system_configdir, 'production-' .. stack .. '.cfg' )
 
 --
 -- Set the EasyBuild variables that point to paths or files
@@ -133,7 +135,26 @@ end
 
 -- -----------------------------------------------------------------------------
 --
--- Test where the help text is adapted to the context.
+-- Bash function to create the directory structure
+--
+
+local bash_func_init = [==[
+    mkdir -p $EASYBUILD_SOURCEPATH ;
+    mkdir -p $EASYBUILD_INSTALLPATH_SOFTWARE ;
+    mkdir -p $EASYBUILD_INSTALLPATH_MODULES ;
+    mkdir -p $EASYBUILD_REPOSITORYPATH ;
+    mkdir -p $EASYBUILD_INSTALLPATH/config ;
+    mkdir -p $EASYBUILD_INSTALLPATH/easyconfigs ;
+]==]
+
+local csh_func_init = bash_func_init
+
+set_shell_function( 'EasyBuild-user-init', bash_func_init, csh_func_init )
+
+-- -----------------------------------------------------------------------------
+--
+-- Make an adaptive help block: If the module is loaded, different information
+-- will be shown.
 --
 
 helptext = [==[
@@ -156,8 +177,6 @@ The following variables should correspond to those use in EasyBuild-production:
   * EASYBUILD_SYSTEM_PREFIX: Directory where EasyBuild searches for the system config
     files, system EasyConfig files and puts the repo. The default value is
     /apps/antwerpen/easybuild.
-  * EASYBUILD_INSTALL_PREFIX: Directory where EasyBuild will put binaries, sources and
-    modules. The default is /apps/antwerpen.
 The following variables should be set by the software stack module:
   * CALCUA_STACK_NAME: The name of the software stack (typically the name of the module
     used to activate the software stack).
@@ -210,7 +229,8 @@ combination of processor and OS version, it may be a good idea to create the dir
 and then reload the software stack module and the EasyBuild-user module (if the latter is
 not reloaded automatically).
 
-For this purpose, we created the script TODO
+For this purpose, we created the command ``EasyBuild-user-init`` which is non-destructive,
+so if you run it on top of an already initialised setup, it should not damage it.
 
 ]==]
 
