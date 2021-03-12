@@ -80,7 +80,7 @@ end
 local archspec =        archspec_os .. '-' .. archspec_target
 local archspec_compat = archspec_os .. '-' .. archspec_target_compat
 
--- - Compute a number of paths and file names
+-- - Compute a number of paths and file names in the user directory
 local user_sourcepath =           pathJoin( user_prefix, 'sources' )
 local user_configdir =            pathJoin( user_prefix, 'config' )
 local user_easyconfigdir =        pathJoin( user_prefix, 'easyconfigs' )
@@ -88,12 +88,18 @@ local user_installpath =          pathJoin( user_prefix, 'stacks',       stack, 
 local user_installpath_software = pathJoin( user_installpath, 'software' )
 local user_installpath_modules =  pathJoin( user_installpath, 'usermodules-' .. stack )
 local user_repositorypath =       pathJoin( user_installpath, 'ebfiles_repo' )
-local user_buildpath =            pathJoin( user_buiildpath )
 
 local user_configfile_generic =   pathJoin( user_configdir, 'user.cfg' )
 local user_configfile_stack =     pathJoin( user_configdir, 'user-' .. stack .. '.cfg' )
 
-local system_repositorypath =     pathJoin( system_prefix, 'repo', stack, archspec_compat )
+-- - Compute a number of system-related paths and file names.
+--   These should align with the EasyBuild-production module!
+local system_repositorypath
+if stack_version == '' then
+  system_repositorypath =         pathJoin( system_prefix, 'repo', archspec_target_compat .. '-' .. archspec_os )
+else
+  system_repositorypath =         pathJoin( system_prefix, 'repo', archspec_target_compat .. '-' .. archspec_os, stack_version )
+end
 local system_configdir =          pathJoin( system_prefix, 'config' )
 local system_easyconfigdir =      pathJoin( system_prefix, 'github/UAntwerpen-easyconfigs' )
 
@@ -116,11 +122,25 @@ setenv( 'EASYBUILD_REPOSITORYPATH',       user_repositorypath )
 
 -- - ROBOT_PATHS
 
+--   + Always included: the user and system repository for the toolchain
 local robot_paths = {user_repositorypath, system_repositorypath}
 
-if isDir( user_easyconfigdir ) then
-    table.insert( robot_paths, user_easyconfigdir )
+--   + If we are using one the calcua/20xxx software stacks, we do need to include the
+--     repository for the calcua/system software stack also.
+if ( stack_name == 'calcua' ) and ( stack_version ~=  'system' ) then
+  table.insert( robot_paths, pathJoin( system_prefix, 'repo', archspec_target_compat .. '-' .. archspec_os, 'system' ) )
 end
+
+--   + For any calcua software stack, we do need to include the repository for the
+--     generic-x86 software stack also.
+if stack_name == 'calcua' then
+  table.insert( robot_paths, pathJoin( system_prefix, 'repo', 'x86_64' .. '-' .. archspec_os ) )
+end
+
+--   + As we will create the user easyconfigdir anyway, we can safely include it too.
+table.insert( robot_paths, user_easyconfigdir )
+
+--   + And at the end, we include the system easyconfig directory.
 table.insert( robot_paths, system_easyconfigdir )
 
 setenv( 'EASYBUILD_ROBOT_PATHS', table.concat( robot_paths, ':' ) )
