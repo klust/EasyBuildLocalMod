@@ -62,19 +62,33 @@ if ( ( mode() == 'load' ) and ( archspec_target_compat == nil ) ) then
     LmodError( 'The environment variable ' .. site .. '_ARCHSPEC_TARGET_COMPAT is missing, did you load a valid software stack module?' )
 end
 
+local user_buildpath = os.getenv( 'XDG_RUNTIME_DIR' )
+if ( user_buildpath == nil ) then
+  -- We're not sure yet if XDG_RUNTIME_DIR exists everywhere where we want to use the module
+  user_buildpath = pathJoin( '/dev/shm/', os.getenv('USER') )
+else
+  user_buildpath = pathJoin( user_buildpath, 'easybuild' )
+end
+
 -- - Prepare some additional variables to reduce the length of some lines
-local stack = stack_name .. '-' .. stack_version
-local archspec = archspec_os .. '-' .. archspec_target
+local stack
+if stack_version == '' then
+  stack =               stack_name
+else
+  stack =               stack_name  .. '-' .. stack_version
+end
+local archspec =        archspec_os .. '-' .. archspec_target
 local archspec_compat = archspec_os .. '-' .. archspec_target_compat
 
 -- - Compute a number of paths and file names
 local user_sourcepath =           pathJoin( user_prefix, 'sources' )
-local user_installpath_software = pathJoin( user_prefix, 'software', stack, archspec )
-local user_installpath_modules =  pathJoin( user_prefix, 'modules',  stack, archspec, 'user-' .. stack )
-local user_repositorypath =       pathJoin( user_prefix, 'repo',     stack, archspec )
 local user_configdir =            pathJoin( user_prefix, 'config' )
 local user_easyconfigdir =        pathJoin( user_prefix, 'easyconfigs' )
-local user_buildpath =            pathJoin( '/dev/shm/', os.getenv('USER') )
+local user_installpath =          pathJoin( user_prefix, 'stacks',       stack, archspec )
+local user_installpath_software = pathJoin( user_installpath, 'software' )
+local user_installpath_modules =  pathJoin( user_installpath, 'usermodules-' .. stack )
+local user_repositorypath =       pathJoin( user_installpath, 'ebfiles_repo' )
+local user_buildpath =            pathJoin( user_buiildpath )
 
 local user_configfile_generic =   pathJoin( user_configdir, 'user.cfg' )
 local user_configfile_stack =     pathJoin( user_configdir, 'user-' .. stack .. '.cfg' )
@@ -92,9 +106,10 @@ local systen_configfile_stack =   pathJoin( system_configdir, 'production-' .. s
 
 -- - Single component paths
 
-setenv( 'EASYBUILD_INSTALLPATH',          user_prefix )
+setenv( 'EASYBUILD_PREFIX',               user_prefix )
 setenv( 'EASYBUILD_SOURCEPATH',           user_sourcepath )
 setenv( 'EASYBUILD_BUILDPATH',            user_buildpath )
+setenv( 'EASYBUILD_INSTALLPATH',          user_installpath )
 setenv( 'EASYBUILD_INSTALLPATH_SOFTWARE', user_installpath_software )
 setenv( 'EASYBUILD_INSTALLPATH_MODULES',  user_installpath_modules )
 setenv( 'EASYBUILD_REPOSITORYPATH',       user_repositorypath )
@@ -139,21 +154,29 @@ end
 
 -- -----------------------------------------------------------------------------
 --
--- Bash function to create the directory structure
+-- Create the directory structure
+--
+-- This isn't really needed as EasyBuild will create those that it needs on the
+-- fly, but it does help to suggest to users right away where which files will
+-- land.
 --
 
-local bash_func_init = [==[
-    mkdir -p $EASYBUILD_SOURCEPATH ;
-    mkdir -p $EASYBUILD_INSTALLPATH_SOFTWARE ;
-    mkdir -p $EASYBUILD_INSTALLPATH_MODULES ;
-    mkdir -p $EASYBUILD_REPOSITORYPATH ;
-    mkdir -p $EASYBUILD_INSTALLPATH/config ;
-    mkdir -p $EASYBUILD_INSTALLPATH/easyconfigs ;
-]==]
+if mode() == 'load' then
 
-local csh_func_init = bash_func_init
+  if not isDir( user_repositorypath )       then execute{ cmd='mkdir -p ' .. user_repositorypath,       modeA={'load'} } end
+  if not isDir( user_sourcepath )           then execute{ cmd='mkdir -p ' .. user_sourcepath,           modeA={'load'} } end
+  if not isDir( user_easyconfigdir )        then execute{ cmd='mkdir -p ' .. user_easyconfigdir,        modeA={'load'} } end
+  if not isDir( user_configdir )            then execute{ cmd='mkdir -p ' .. user_configdir,            modeA={'load'} } end
+  if not isDir( user_installpath_software ) then execute{ cmd='mkdir -p ' .. user_installpath_software, modeA={'load'} } end
+  if not isDir( user_installpath_modules )  then
+    execute{ cmd='mkdir -p ' .. user_installpath_modules,  modeA={'load'} }
+    -- We've just created the directory so it was not yet in the MODULEPATH.
+    -- Add it and leave it to the software stack module which will find it when
+    -- it does an unload to remove the directory from the MODULEPATH.
+    prepend_path( 'MODULEPATH', user_installpath_modules )
+  end
 
-set_shell_function( 'EasyBuild-user-init', bash_func_init, csh_func_init )
+end
 
 -- -----------------------------------------------------------------------------
 --
@@ -223,19 +246,15 @@ Options that are redefined overwrite the old value. However, environment variabl
 this module do take precedence over the values computed from the configuration files.
 
 To check the actual configuration used by EasyBuild, run ``eb --show-config``. This is
-also a good syntax check for the files.
+also a good syntax check for the configuration files.
 
 First use for a software stack
 ==============================
-EasyBuild will auto-create most of these directories if they do not yet exist. However,
-if you use the module for the first time for a specific software stack and for a specific
-combination of processor and OS version, it may be a good idea to create the directories
-and then reload the software stack module and the EasyBuild-user module (if the latter is
-not reloaded automatically).
-
-For this purpose, we created the command ``EasyBuild-user-init`` which is non-destructive,
-so if you run it on top of an already initialised setup, it should not damage it.
-
+The module will also take care of creating most of the subdirectories that it
+sets, even though EasyBuild would do so anyway when you use it. It does howver
+give you a clear picture of the directory structure just after loading the
+module, and it also ensures that the softwate stack modules can add your user
+modules to the front of the module search path.
 ]==]
 
 help( helptext )
