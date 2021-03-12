@@ -328,7 +328,7 @@ of software stacks for various machines.
       * User config file (if needed, by default everything will be done by environment
         variables): $EBU_USER_PREFIX/config
           * ``user.cfg``
-          * ``user-$$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION.cfg``, content overwrites
+          * ``user-$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION.cfg``, content overwrites
             the former and all system config files.
 
       * Sources are stored in ``$EBU_USER_PREFIX/Sources``
@@ -344,7 +344,7 @@ of software stacks for various machines.
 ### robot-path
 
 There are two options here:
-  * Either we put the ``ebfies_repo``-directories in the front of the path to ensure
+  * Either we put the ``ebfiles_repo``-directories in the front of the path to ensure
     that EasyBuild will pick the EasyConfig files that are actually installed on the
     system whenever it encounters already installed software in the list of dependencies
     and hence make the right decisions about further dependencies.
