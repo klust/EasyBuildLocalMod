@@ -111,11 +111,11 @@ Current directories
   * generic-x86:
       * on AMD Rome CPUs:
           * Binaries: ``/apps/antwerpen/x86_64/centos8``
-          * Modules: ``/apps/antwerpen/modules/centos8/software-x86``
+          * Modules: ``/apps/antwerpen/modules/centos8/software-x86_64``
           * Repo: ``/apps/antwerpen/easybuild/repo/x86_64-centos8``
       * on Intel broadwell CPUs:
           * Binaries: ``/apps/antwerpen/x86_64/centos7``
-          * Modules: ``/apps/antwerpen/modules/centos7/software-x86''
+          * Modules: ``/apps/antwerpen/modules/centos7/software-x86_64''
           * Repo: ``/apps/antwerpen/easybuild/repo/x86_64-centos8``
 
 The structures for ``calcua/2020a`` and ``calcua/system`` follow the same pattern,
@@ -129,8 +129,7 @@ One idea to make the directory structure more uniform is
     CALCUA_STACK_VERSION is set but set to an empty string (if this works).
     A possible alternative is to set the version to, e.g., ``default``, and catch
     that in the EasyBuild-production module.
-  * And renaming/symlinking ``software-x86` to ``software-x86_64`` and
-    set CALCUA_ARCHSPEC_TARGET and CALCUA_ARCHSPEC_TARGET_COMPAT to ``x86_64``.
+  * Set CALCUA_ARCHSPEC_TARGET and CALCUA_ARCHSPEC_TARGET_COMPAT to ``x86_64``.
 
 Directories to set in the EasyBuild-production module:
 
@@ -140,6 +139,16 @@ Directories to set in the EasyBuild-production module:
     ``$EBU_INSTALL_PREFIX/$CALCUA_ARCHSPEC_TARGET/$CALCUA_ARCHSPEC_OS``
     which would align us a little bit more with what's happening in Gent and likely
     on the Tier-1c system.
+
+    From the calcua/2020b toolchain on, we add another level to the directory
+    structure so that we can start installing software packages compiled against
+    the system toolchain in the calcua/20* software stacks rather than in the
+    system software stack if they are clearly meant to be used with a particular
+    software stack or a few stacks. However, we must then assure that we would not
+    overwrite binaries of a version of a package that we install in a second
+    software stack. Hence from then on and for the calcua/20* software stacks only
+    software packages are installed in
+    ``$EBU_INSTALL_PREFIX/$CALCUA_ARCHSPEC_TARGET/$CALCUA_ARCHSPEC_OS/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION``
 
   * Modules:
     ``$EBU_INSTALL_PREFIX/modules/$CALCUA_ARCHSPEC_OS/software-$CALCUA_ARCHSPEC_TARGET_COMPAT/$CALCUA_STACK_VERSION``
