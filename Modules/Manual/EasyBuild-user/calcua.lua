@@ -42,24 +42,54 @@ if ( user_prefix    == nil ) then user_prefix    = default_user_prefix    end
 if ( system_prefix  == nil ) then system_prefix  = default_system_prefix  end
 
 local stack_name =             os.getenv( site .. '_STACK_NAME' )
-if ( ( mode() == 'load' ) and ( stack_name == nil ) ) then
+if ( stack_name == nil ) then
+  if ( mode() == 'load' ) then
     LmodError( 'The environment variable ' .. site .. '_STACK_NAME is missing, did you load a valid software stack module?' )
+  elseif ( mode() == 'unload' ) then
+    LmodMessage( 'The environment variable ' .. site .. '_STACK_NAME is missing, did you unload the software stack module?' )
+  else
+    stack_name = '<STACK>'
+  end
 end
 local stack_version =          os.getenv( site .. '_STACK_VERSION' )
-if ( ( mode() == 'load' ) and ( stack_version == nil ) ) then
+if ( stack_version == nil ) then
+  if ( mode() == 'load' ) then
     LmodError( 'The environment variable ' .. site .. '_STACK_VERSION is missing, did you load a valid software stack module?' )
+  elseif ( mode() == 'unload' ) then
+    LmodMessage( 'The environment variable ' .. site .. '_STACK_VERSION is missing, did you unload the software stack module?' )
+  else
+    stack_version = '<VERSION>'
+  end
 end
 local archspec_os =            os.getenv( site .. '_ARCHSPEC_OS' )
-if ( ( mode() == 'load' ) and ( archspec_os == nil ) ) then
+if ( archspec_os == nil ) then
+  if ( mode() == 'load' ) then
     LmodError( 'The environment variable ' .. site .. '_ARCHSPEC_OS is missing, did you load a valid software stack module?' )
+  elseif ( mode() == 'unload' ) then
+    LmodMessage( 'The environment variable ' .. site .. '_ARCHSPEC_OS is missing, did you unload the software stack module?' )
+  else
+    archspec_os = '<OS>'
+  end
 end
 local archspec_target =        os.getenv( site .. '_ARCHSPEC_TARGET' )
-if ( ( mode() == 'load' ) and ( archspec_target == nil ) ) then
+if ( archspec_target == nil ) then
+  if ( mode() == 'load' ) then
     LmodError( 'The environment variable ' .. site .. '_ARCHSPEC_TARGET is missing, did you load a valid software stack module?' )
+  elseif ( mode() == 'unload' ) then
+    LmodMessage( 'The environment variable ' .. site .. '_ARCHSPEC_TARGET is missing, did you unload the software stack module?' )
+  else
+    archspec_target = '<ARCH>'
+  end
 end
 local archspec_target_compat = os.getenv( site .. '_ARCHSPEC_TARGET_COMPAT' )
-if ( ( mode() == 'load' ) and ( archspec_target_compat == nil ) ) then
+if ( archspec_target_compat == nil ) then
+  if ( mode() == 'load' ) then
     LmodError( 'The environment variable ' .. site .. '_ARCHSPEC_TARGET_COMPAT is missing, did you load a valid software stack module?' )
+  elseif ( mode() == 'unload' ) then
+    LmodMessage( 'The environment variable ' .. site .. '_ARCHSPEC_TARGET_COMPAT is missing, did you unload the software stack module?' )
+  else
+    archspec_target_compat = '<ARCH_COMPAT>'
+  end
 end
 
 local user_buildpath = os.getenv( 'XDG_RUNTIME_DIR' )
@@ -84,7 +114,7 @@ local archspec_compat = archspec_os .. '-' .. archspec_target_compat
 local user_sourcepath =           pathJoin( user_prefix, 'sources' )
 local user_configdir =            pathJoin( user_prefix, 'config' )
 local user_easyconfigdir =        pathJoin( user_prefix, 'easyconfigs' )
-local user_installpath =          pathJoin( user_prefix, 'stacks',       stack, archspec )
+local user_installpath =          pathJoin( user_prefix, 'stacks', stack, archspec )
 local user_installpath_software = pathJoin( user_installpath, 'software' )
 local user_installpath_modules =  pathJoin( user_installpath, 'usermodules-' .. stack )
 local user_repositorypath =       pathJoin( user_installpath, 'ebfiles_repo' )
@@ -122,7 +152,7 @@ setenv( 'EASYBUILD_REPOSITORYPATH',       user_repositorypath )
 
 -- - ROBOT_PATHS
 
---   + Always included: the user and system repository for the toolchain
+--   + Always included: the user and system repository for the software stack
 local robot_paths = {user_repositorypath, system_repositorypath}
 
 --   + If we are using one the calcua/20xxx software stacks, we do need to include the
@@ -244,8 +274,8 @@ helptext = helptext .. '  * Directory for EasyConfig files:           ' .. user_
 helptext = helptext .. '  * Software installation:                    ' .. user_installpath_software .. '\n'
 helptext = helptext .. '  * Module files:                             ' .. user_installpath_modules .. '\n'
 helptext = helptext .. '  * EasyBuild configuration files:            ' .. user_configdir .. '\n'
-helptext = helptext .. '     - Generic config file:                   user.cfg\n'
-helptext = helptext .. '     - Software stack-specific config file:   user-'  .. stack .. '.cfg\n'
+helptext = helptext .. '     - Generic config file:                   ' .. user_configfile_generic
+helptext = helptext .. '     - Software stack-specific config file:   ' .. user_configfile_stack
 helptext = helptext .. '  * Sources of installed packages:            ' .. user_sourcepath .. '\n'
 helptext = helptext .. '  * Repository of installed EasyConfigs       ' .. user_repositorypath .. '\n'
 helptext = helptext .. '  * Builds are performed in:                  ' .. user_buildpath .. '\n'
@@ -255,6 +285,7 @@ helptext = helptext .. '  * Generic config file:                      ' .. syste
 helptext = helptext .. '  * Software stack-specific config file:      ' .. systen_configfile_stack .. '\n'
 helptext = helptext .. '  * Directory of EasyConfig files:            ' .. system_easyconfigdir .. '\n'
 helptext = helptext .. '  * Repository of installed EasyConfigs:      ' .. system_repositorypath .. '\n'
+
 helptext = helptext .. [==[
 
 If multiple configuration files are given, they are read in the following order:
@@ -271,9 +302,9 @@ also a good syntax check for the configuration files.
 First use for a software stack
 ==============================
 The module will also take care of creating most of the subdirectories that it
-sets, even though EasyBuild would do so anyway when you use it. It does howver
+sets, even though EasyBuild would do so anyway when you use it. It does however
 give you a clear picture of the directory structure just after loading the
-module, and it also ensures that the softwate stack modules can add your user
+module, and it also ensures that the software stack modules can add your user
 modules to the front of the module search path.
 ]==]
 
