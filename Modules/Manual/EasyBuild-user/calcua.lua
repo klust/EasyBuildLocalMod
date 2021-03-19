@@ -148,6 +148,7 @@ setenv( 'EASYBUILD_BUILDPATH',            user_buildpath )
 setenv( 'EASYBUILD_INSTALLPATH',          user_installpath )
 setenv( 'EASYBUILD_INSTALLPATH_SOFTWARE', user_installpath_software )
 setenv( 'EASYBUILD_INSTALLPATH_MODULES',  user_installpath_modules )
+setenv( 'EASYBUILD_REPOSITORY',           'FileRepository' )
 setenv( 'EASYBUILD_REPOSITORYPATH',       user_repositorypath )
 
 -- - ROBOT_PATHS
