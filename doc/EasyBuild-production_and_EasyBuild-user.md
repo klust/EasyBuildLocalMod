@@ -131,12 +131,27 @@ Other changes, not initiated by the manual:
     a different toolchain than the two common ``foss`` and ``intel`` toolchains and their
     subtoolchains.
 
+The modules keep a repository of installed EasyBuild recipes for each software stack
+in the directory structure. The relevant repositories for the selected module
+(EasyBuild-production or EasyBuild-user) and software stack
+are at the front of the robot search path, and the software stack module and robot
+search path are set such that they correspond, so EasyBuild should always find matching
+module files and EasyConfig files for software that is already installed on the system
+or in the user's directory using these modules. This prevents problems when, e.g.,
+a user changes the EasyConfig for a package that is installed and makes changes to
+the dependencies but forgets to reinstall the package. In that case, the EasyConfig
+file in the EasyBuild-managed repositories of installed packages would still correspond
+to the module while the one in the tree where the user edits EasyConfig files would
+not, and using the latter may cause trouble when installing other software that depends
+on that package as the dependency trees from the module files and EasyConfig files
+would be different.
+
 EasyBuild-production and EasyBuild-user use three optional environment variables
 to point to the locations of various files in the EasyBuild installation. However,
 reasonable defaults are encoded in the module so these variables need not be set.
   * EBU_SYSTEM_PREFIX: Directory where EasyBuild searches for the system config
-    files, system EasyConfig files and puts the repo. The default value is
-    /apps/antwerpen/easybuild.
+    files, system EasyConfig files and puts the repository of installed
+    EasyBuild recipes. The default value is     /apps/antwerpen/easybuild.
   * EBU_INSTALL_PREFIX: Directory where EasyBuild will put binaries, sources and
     modules. The default is /apps/antwerpen.
 
@@ -275,6 +290,10 @@ Variables that do not depend on the software stack are:
         that environment variable exists as this directory is automatically
         cleaned when a user logs out. If that environment variable does not
         exist, ``/dev/shm/$USER`` is used instead.
+  * EASYBUILD_REPOSITORY: Set to ``FileRepository`` (which seems to be the default
+    anyway)
+  * EB_PYTHON: Set to python3, but this may be set in the other EasyBuild modules
+    already.
 
 Variables that depend on the software stack:
   * EASYBUILD_INSTALLDIR: It is set but currently not really used as we also
@@ -286,5 +305,21 @@ Variables that depend on the software stack:
   * EASYBUILD_INSTALLDIR_SOFTWARE: The installation directory for the software
     packages
   * EASYBUILD_INSTALLDIR_MODULES: The installation directory for the module files
+  * EASYBUILD_REPOSITORYPATH: The directory for the repository of installed EasyBuild
+    recipes
+  * EASYBUILD_ROBOT_PATHS: This path contains the relevant repositories of installed
+    EasyBuild recipes, the user EasyConfig directory (if EasyBuild-user) and the
+    site one.
+  * EASYBUILD_CONFIGFILES: Set if any of the 2 (EasyBuild-production) or 4 (EasyBuild-user)
+    configuration files are found to point to those files in the order indicated before
+    in this documentation.
 
+Other variables
+  * EASYBUILD_OPTARCH: This variable is set to GENERIC for the ``generic-x86`` software stack
+    and gets appropriate options for the Intel and GCC compilers on AMD zen2. It is
+    not defined in other cases as the defaults are OK.
+
+    Note that there may be some old update scripts for EasyBuild circulating that
+    still require Python 2. However, we have experienced problems running recent
+    versions of EasyBuild with Python 2 on some CalcUA systems.
 
