@@ -28,6 +28,8 @@ local clusteros = os.getenv('VSC_OS_LOCAL')
 local archspec_target = procarch
 if procarch == 'rome' then
     archspec_target = 'zen2'
+elseif procarch == 'skylake' then
+    archspec_target = 'skylake_avx512'
 end
 
 --
