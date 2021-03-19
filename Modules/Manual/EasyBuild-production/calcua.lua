@@ -259,10 +259,10 @@ After loading the module, it is possible to simply use the eb command without fu
 need for aliases.
 
 The module assumes the following environment variables:
-  * EASYBUILD_SYSTEM_PREFIX: Directory where EasyBuild searches for the system config
+  * EBU_SYSTEM_PREFIX: Directory where EasyBuild searches for the system config
     files, system EasyConfig files and puts the repo. The default value is
     /apps/antwerpen/easybuild.
-  * EASYBUILD_INSTALL_PREFIX: Directory where EasyBuild will put binaries, sources and
+  * EBU_INSTALL_PREFIX: Directory where EasyBuild will put binaries, sources and
     modules. The default is /apps/antwerpen.
 The following variables should be set by the software stack module:
   * CALCUA_STACK_NAME: The name of the software stack (typically the name of the module
@@ -284,8 +284,8 @@ helptext = helptext .. '  * Directory for EasyConfig files:           ' .. syste
 helptext = helptext .. '  * Software installation:                    ' .. system_installpath_software .. '\n'
 helptext = helptext .. '  * Module files:                             ' .. system_installpath_modules .. '\n'
 helptext = helptext .. '  * EasyBuild configuration files:            ' .. system_configdir .. '\n'
-helptext = helptext .. '     - Generic config file:                   production.cfg\n'
-helptext = helptext .. '     - Software stack-specific config file:   production-'  .. stack .. '.cfg\n'
+helptext = helptext .. '     - Generic config file:                   ' .. system_configfile_generic .. '\n'
+helptext = helptext .. '     - Software stack-specific config file:   ' .. systen_configfile_stack .. '\n'
 helptext = helptext .. '  * Sources of installed packages:            ' .. system_sourcepath .. '\n'
 helptext = helptext .. '  * Repository of installed EasyConfigs       ' .. system_repositorypath .. '\n'
 helptext = helptext .. '  * Builds are performed in:                  ' .. system_buildpath .. '\n'

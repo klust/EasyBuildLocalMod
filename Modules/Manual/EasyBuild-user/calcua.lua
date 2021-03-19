@@ -248,10 +248,10 @@ After loading the module, it is possible to simply use the eb command without fu
 need for aliases.
 
 The module assumes the following environment variables:
-  * EASYBUILD_USER_PREFIX: Prefix for the EasyBuild user installation. The default
+  * EBU_USER_PREFIX: Prefix for the EasyBuild user installation. The default
     is $VSC_DATA/EasyBuild.
 The following variables should correspond to those use in EasyBuild-production:
-  * EASYBUILD_SYSTEM_PREFIX: Directory where EasyBuild searches for the system config
+  * EBU_SYSTEM_PREFIX: Directory where EasyBuild searches for the system config
     files, system EasyConfig files and puts the repo. The default value is
     /apps/antwerpen/easybuild.
 The following variables should be set by the software stack module:
@@ -274,8 +274,8 @@ helptext = helptext .. '  * Directory for EasyConfig files:           ' .. user_
 helptext = helptext .. '  * Software installation:                    ' .. user_installpath_software .. '\n'
 helptext = helptext .. '  * Module files:                             ' .. user_installpath_modules .. '\n'
 helptext = helptext .. '  * EasyBuild configuration files:            ' .. user_configdir .. '\n'
-helptext = helptext .. '     - Generic config file:                   ' .. user_configfile_generic
-helptext = helptext .. '     - Software stack-specific config file:   ' .. user_configfile_stack
+helptext = helptext .. '     - Generic config file:                   ' .. user_configfile_generic .. '\n'
+helptext = helptext .. '     - Software stack-specific config file:   ' .. user_configfile_stack .. '\n'
 helptext = helptext .. '  * Sources of installed packages:            ' .. user_sourcepath .. '\n'
 helptext = helptext .. '  * Repository of installed EasyConfigs       ' .. user_repositorypath .. '\n'
 helptext = helptext .. '  * Builds are performed in:                  ' .. user_buildpath .. '\n'
