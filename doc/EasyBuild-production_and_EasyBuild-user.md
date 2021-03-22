@@ -14,7 +14,7 @@ The modules are constructed in such a way that it should be easy to write equiva
 modules or to extend the module files to also install software on top of the EESSI
 software stack for machines that support that stack when it will be released.
 
-## Software stacks on the CaclUA cluster
+## Software stacks on the CalcUA cluster
 
 On the UAntwerpen clusters the idea of software stacks is not as well developed as
 in EESSI or in some other supercomputer centres. Therefore some compromises are made
@@ -262,9 +262,150 @@ Spack.
 
 ### Directory setup for EasyBuild-production
 
+The directory setup follows as much as possible the directory structure that was already
+in use on the CalcUA clusters, with one change to the software installation path for
+new software stacks past the 2020a stack.
+
+  * Directories specific to a software stack:
+
+      * Software packages:
+        ``$EBU_INSTALL_PREFIX/$CALCUA_ARCHSPEC_TARGET_COMPAT/$CALCUA_ARCHSPEC_OS``
+
+        From the calcua/2020b stack on, we add another level to the directory
+        structure so that we can start installing software packages compiled against
+        the system toolchain in the calcua/20* software stacks rather than in the
+        system software stack if they are clearly meant to be used with a particular
+        software stack or a few stacks. However, we must then assure that we would not
+        overwrite binaries of a version of a package that we install in a second
+        software stack. Hence from then on and for the calcua/20* software stacks only
+        software packages are installed in
+        ``$EBU_INSTALL_PREFIX/$CALCUA_ARCHSPEC_TARGET/$CALCUA_ARCHSPEC_OS/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION``
+
+      * Modules:
+        ``$EBU_INSTALL_PREFIX/modules/$CALCUA_ARCHSPEC_OS/software-$CALCUA_ARCHSPEC_TARGET_COMPAT/$CALCUA_STACK_VERSION``
+
+      * Repository of installed easyconfigs:
+        ``$EBU_SYSTEM_PREFIX/repo/$CALCUA_ARCHSPEC_TARGET_COMPAT-$CALCUA_ARCHSPEC_OS/$CALCUA_STACK_VERSION``
+
+  * Directories common for all software stacks
+
+      * System-wide configuration files of EasyBuild: ``$EBU_SYSTEM_PREFIX/config``
+
+        As EasyBuild does not yet use the archspec database of compiler options for optimization,
+        we still need to set ``optarch`` for some architectures (currently at least for
+        AMD rome). This is embedded in the module file for now until EasyBuild
+        would become more clever in setting this up.
+
+        Even though EasyBuild-production does most of the settings in the module file,
+        a configuration file may still be useful, e.g., to hide certain modules (as is
+        done in the CSCS setup). To be able to evolve the setup, we still use a separate
+        configuration file for each pair ($CALCUA_STACK_NAME, $CALCUA_STACK_VERSION):
+          * ``production.cfg`` with all the common settings for all toolchains.
+          * ``production-$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION.cfg``.
+
+        In the current installation, only ``procuction.cfg`` is used.
+
+      * Sources are stored in ``$EBU_INSTALL_PREFIX/sources``
+
+      * The build directory: ``/dev/shm/$USER``
+
+      * The local EasyConfig files are in
+        ``$EBU_SYSTEM_PREFIX/github/UAntwerpen-easyconfigs``.
+
+The default setup hence becomes:
+
+  * Directories specific to a software stack:
+
+      * For the ``calcua/2020a`` software stack on AMD rome with CentOS 8 as on Vaughan:
+          * Software in ``/apps/antwerpen/rome/centos8``
+          * Modules in ``/apps/antwerpen/modules/centos8/software-rome/2020a``
+          * Repository of installed EasyConfig files in ``/apps/antwerpen/easybuild/repo/rome-centos8/2020a``
+      * For a hypothetical ``calcua/2020b`` software stack on Broadwell with CentOS 7 as
+        on Leibniz:
+          * Software in ``/apps/antwerpen/broadwell/centos7/calcua-2020b``
+          * Modules in ``/apps/antwerpen/modules/centos7/software-broadwell/2020b``
+          * Repository of installed EasyConfig files in ``/apps/antwerpen/easybuild/repo/broadwell-centos7/2020b``
+      * For the ``calcua/system`` software stack on AMD rome with CentOS 8 as on Vaughan
+          * Software in ``/apps/antwerpen/rome/centos8``
+          * Modules in ``/apps/antwerpen/modules/centos8/software-rome/system``
+          * Repository of installed EasyConfig files in ``/apps/antwerpen/easybuild/repo/rome-centos8/system``
+      * For the ``generic-x86`` software stack on AMD rome with CentOS 8 as on Vaughan
+          * Software in ``/apps/antwerpen/x86_64/centos8``
+          * Modules in ``/apps/antwerpen/modules/centos8/software-x86_64``
+          * Repository of installed EasyConfig files in ``/apps/antwerpen/easybuild/repo/x86_64-centos8``
+
+  * Directories common for all software stacks
+
+      * Configuration files in ``/apps/antwerpen/easybuild/config``
+
+      * Sources in ``/apps/antwerpen/sources``
+
+      * Temporary build directory in ``/dev/shm/$USER``
+
+      * The local EasyConfig files are in ``/apps/antwerpen/easybuild/github/UAntwerpen-easyconfigs``
+
 
 ### Directory setup for EasyBuild-user
 
+The user directory structure is different from the system and and already takes
+into account possible future extension to also support installation on top of
+EESSI should we ever roll this out on the calcua infrastructure.
+Moreover, unlike the production version of the module, we do try to follow EasyBuild
+naming a bit more to make the installation more recognizable, but we do add the concept
+of software stacks for various machines.
+
+  * Directories specific to a software stack:
+
+      * Software packages:
+        ``$EBU_USER_PREFIX/stacks/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$VALCUA_ARCHSPEC_TARGET/software``
+
+        For unversioned software stacks ``-$CALCUA_STACK_VERSION`` is omitted.
+
+        Examples:
+          * ``calcua/2020a``:  ``/data/20z/vsc20xyz/EasyBuild/stacks/calcua-2020a/centos8-zen2/software``
+          * ``generic-x86``:   ``/data/20z/vsc20xyz/EasyBuild/stacks/generic-x86/centos8-x86_64/software``
+          * ``EESSI/2020.12``: ``/data/20z/vsc20xyz/EasyBuild/stacks/EESSI-2020.12/GentooPrefix-zen2/software``
+
+      * Modules:
+        ``$EBU_USER_PREFIX/stacks/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$VALCUA_ARCHSPEC_TARGET/usermodules-$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION``
+
+        For unversioned software stacks ``-$CALCUA_STACK_VERSION`` is omitted.
+
+        Examples:
+          * ``calcua/2020a``:  ``/data/20z/vsc20xyz/EasyBuild/stacks/calcua-2020a/centos8-zen2/usermodules-calcua-2020``
+          * ``generic-x86``:   ``/data/20z/vsc20xyz/EasyBuild/stacks/generic-x86/centos8-x86_64/usermodules-generic-x86``
+          * ``EESSI/2020.12``: ``/data/20z/vsc20xyz/EasyBuild/stacks/EESSI-2020.12/GentooPrefix-zen2/usermodules-EESSI-2020.12``
+
+      * The repo-directory is
+        ``$EBU_USER_PREFIX/stacks/$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION/$CALCUA_ARCHSPEC_OS-$VALCUA_ARCHSPEC_TARGET/ebfiles_repo``
+
+        Even though EasyBuild doesn't use ``EASYBUILD_INSTALLPATH`` to put it
+        where the binaries and module files are put, we decided to keep the
+        repository with the modules and binaries as it also reflects which packages
+        are installed and as it also simplifies maintenance to ensure that the repo
+        entry for a package is deleted when the module file and binaries are deleted.
+
+        For unversioned software stacks ``-$CALCUA_STACK_VERSION`` is omitted.
+
+        Examples:
+          * ``calcua/2020a``:  ``/data/20z/vsc20xyz/EasyBuild/stacks/calcua-2020a/centos8-zen2/ebfiles_repo``
+          * ``generic-x86``:   ``/data/20z/vsc20xyz/EasyBuild/stacks/generic-x86/centos8-x86_64/ebfiles_repo``
+          * ``EESSI/2020.12``: ``/data/20z/vsc20xyz/EasyBuild/stacks/EESSI-2020.12/GentooPrefix-zen2/ebfiles_repo``
+
+  * Directories common for all software stacks
+
+      * User config file (if needed, by default everything will be done by environment
+        variables): $EBU_USER_PREFIX/config
+          * ``user.cfg``
+          * ``user-$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION.cfg``, content overwrites
+            the former and all system config files.
+
+      * Sources are stored in ``$EBU_USER_PREFIX/Sources``
+
+      * The build directory: ``$XDG_RUNTIME_DIR/easybuild`` which is smaller than ''/dev/shm''
+        but has the advantage that it is cleared automatically when the last session of
+        a user ends, so we avoid uncareful users clogging up the temporary file system
+        in RAM memory.
 
 
 ### The EasyBuild-production and EasyBuild-user modules
