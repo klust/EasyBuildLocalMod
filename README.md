@@ -140,7 +140,7 @@ Directories to set in the EasyBuild-production module:
     which would align us a little bit more with what's happening in Gent and likely
     on the Tier-1c system.
 
-    From the calcua/2020b toolchain on, we add another level to the directory
+    From the calcua/2020b stack on, we add another level to the directory
     structure so that we can start installing software packages compiled against
     the system toolchain in the calcua/20* software stacks rather than in the
     system software stack if they are clearly meant to be used with a particular
@@ -156,9 +156,9 @@ Directories to set in the EasyBuild-production module:
     with some symbolic linking.
 
   * Repository of installed easyconfigs:
-    ``$EBU_SYSTEM_PREFIX/repo/$CALCUA_ARCHSPEC_TARGET_COMPAT-$CALCUA_ARCHSPEC_OS``
-    though weith some symbolic linking we couls safely change that to
-    ``$EBU_SYSTEM_PREFIX/repo/$CALCUA_ARCHSPEC_TARGET-$CALCUA_ARCHSPEC_OS``.
+    ``$EBU_SYSTEM_PREFIX/repo/$CALCUA_ARCHSPEC_TARGET_COMPAT-$CALCUA_ARCHSPEC_OS/$CALCUA_STACK_VERSION``
+    though weith some symbolic linking we could safely change that to
+    ``$EBU_SYSTEM_PREFIX/repo/$CALCUA_ARCHSPEC_TARGET-$CALCUA_ARCHSPEC_OS/$CALCUA_STACK_VERSION``.
 
 There are other directories common to all three variants that are given below.
 
@@ -271,16 +271,16 @@ The directory structure here mirrors directly the directory structure for user i
     Even though EasyBuild-production does most of the settings in the module file,
     a configuration file may still be useful, e.g., to hide certain modules (as is
     done in the CSCS setup). To be able to evolve the setup, we still use a separate
-    configuration file for each par ($CALCUA_STACK_NAME, $CALCUA_STACK_VERSION):
+    configuration file for each pair ($CALCUA_STACK_NAME, $CALCUA_STACK_VERSION):
       * ``production.cfg`` with all the common settings for all toolchains.
       * ``production-$CALCUA_STACK_NAME-$CALCUA_STACK_VERSION.cfg``.
 
-  * Sources are stored in $EBU_INSTALL_PREFIX/sources
+  * Sources are stored in ``$EBU_INSTALL_PREFIX/sources``
     for compatibility with the current setup. They do in general not depend on OS,
     architecture or versions of the software stack so it is not needed to further
     distinguish between them.
 
-  * The build directory: /dev/shm/$USER
+  * The build directory: ``/dev/shm/$USER``
 
   * The local EasyConfig files are currently at
     ``$EBU_SYSTEM_PREFIX/github/UAntwerpen-easyconfigs``.
