@@ -92,12 +92,16 @@ if ( archspec_target_compat == nil ) then
   end
 end
 
-local user_buildpath = os.getenv( 'XDG_RUNTIME_DIR' )
-if ( user_buildpath == nil ) then
+local user_buildpath
+local user_tmpdir
+local xdg_runtime_dir = os.getenv( 'XDG_RUNTIME_DIR' )
+if ( xdg_runtime_dir == nil ) then
   -- We're not sure yet if XDG_RUNTIME_DIR exists everywhere where we want to use the module
-  user_buildpath = pathJoin( '/dev/shm/', os.getenv('USER') )
+  user_buildpath = pathJoin( '/dev/shm/', os.getenv('USER'), 'build' )
+  user_tmpdir =    os.getenv( 'VSC_NODE_SCRATCH')
 else
-  user_buildpath = pathJoin( user_buildpath, 'easybuild' )
+  user_buildpath = pathJoin( xdg_runtime_dir, 'easybuild', 'build' )
+  user_tmpdir =    pathJoin( xdg_runtime_dir, 'easybuild', 'tmp' )
 end
 
 -- - Prepare some additional variables to reduce the length of some lines
@@ -145,6 +149,7 @@ local systen_configfile_stack =   pathJoin( system_configdir, 'production-' .. s
 setenv( 'EASYBUILD_PREFIX',               user_prefix )
 setenv( 'EASYBUILD_SOURCEPATH',           user_sourcepath )
 setenv( 'EASYBUILD_BUILDPATH',            user_buildpath )
+setenv( 'EASYBUILD_TMPDIR',               user_tmpdir )
 setenv( 'EASYBUILD_INSTALLPATH',          user_installpath )
 setenv( 'EASYBUILD_INSTALLPATH_SOFTWARE', user_installpath_software )
 setenv( 'EASYBUILD_INSTALLPATH_MODULES',  user_installpath_modules )
@@ -235,7 +240,7 @@ end
 -- will be shown.
 --
 
-helptext = [==[
+helptext = [[
 Description
 ===========
 The EasyBuild-user module configures EasyBuild through environment variables
@@ -269,25 +274,34 @@ The following variables should be set by the software stack module:
     as we have used "rome" instead of "zen2".
 
 The following user-specific directories and files are used by this module:
-]==]
+  * Directory for EasyConfig files:           ]] .. user_easyconfigdir .. '\n' .. [[
+  * Software installation:                    ]] .. user_installpath_software .. '\n' .. [[
+  * Module files:                             ]] .. user_installpath_modules .. '\n' .. [[
+  * EasyBuild configuration files:            ]] .. user_configdir .. '\n' .. [[
+     - Generic config file:                   ]] .. user_configfile_generic .. '\n' .. [[
+     - Software stack-specific config file:   ]] .. user_configfile_stack .. '\n' .. [[
+  * Sources of installed packages:            ]] .. user_sourcepath .. '\n' .. [[
+  * Repository of installed EasyConfigs       ]] .. user_repositorypath .. '\n' .. [[
+  * Builds are performed in:                  ]] .. user_buildpath .. '\n'
+if ( xdg_runtime_dir == nil ) then
+  helptext = helptext .. '    Don\'t forget to clean if a build fails!\n'
+else
+  helptext = helptext .. '    This directory will be cleaned when you log out.\n'
+end
+helptext = helptext .. '  * Temporary directory for logs etc.:        ' .. user_tmpdir .. '\n'
+if ( xdg_runtime_dir == nil ) then
+  helptext = helptext .. '    Don\'t forget to clean every now and then!\n'
+else
+  helptext = helptext .. '    This directory will be cleaned when you log out.\n'
+end
 
-helptext = helptext .. '  * Directory for EasyConfig files:           ' .. user_easyconfigdir .. '\n'
-helptext = helptext .. '  * Software installation:                    ' .. user_installpath_software .. '\n'
-helptext = helptext .. '  * Module files:                             ' .. user_installpath_modules .. '\n'
-helptext = helptext .. '  * EasyBuild configuration files:            ' .. user_configdir .. '\n'
-helptext = helptext .. '     - Generic config file:                   ' .. user_configfile_generic .. '\n'
-helptext = helptext .. '     - Software stack-specific config file:   ' .. user_configfile_stack .. '\n'
-helptext = helptext .. '  * Sources of installed packages:            ' .. user_sourcepath .. '\n'
-helptext = helptext .. '  * Repository of installed EasyConfigs       ' .. user_repositorypath .. '\n'
-helptext = helptext .. '  * Builds are performed in:                  ' .. user_buildpath .. '\n'
-helptext = helptext .. '    Don\'t forget to clean if a build fails!\n'
-helptext = helptext .. '\nThe following system directories and files are used (if present):\n'
-helptext = helptext .. '  * Generic config file:                      ' .. system_configfile_generic .. '\n'
-helptext = helptext .. '  * Software stack-specific config file:      ' .. systen_configfile_stack .. '\n'
-helptext = helptext .. '  * Directory of EasyConfig files:            ' .. system_easyconfigdir .. '\n'
-helptext = helptext .. '  * Repository of installed EasyConfigs:      ' .. system_repositorypath .. '\n'
+helptext = helptext .. [[
 
-helptext = helptext .. [==[
+The following system directories and files are used (if present):
+  * Generic config file:                      ]] .. system_configfile_generic .. '\n' .. [[
+  * Software stack-specific config file:      ]] .. systen_configfile_stack .. '\n' .. [[
+  * Directory of EasyConfig files:            ]] .. system_easyconfigdir .. '\n' .. [[
+  * Repository of installed EasyConfigs:      ]] .. system_repositorypath .. '\n' .. [[
 
 If multiple configuration files are given, they are read in the following order:
   1. System generic configuration file
@@ -307,7 +321,7 @@ sets, even though EasyBuild would do so anyway when you use it. It does however
 give you a clear picture of the directory structure just after loading the
 module, and it also ensures that the software stack modules can add your user
 modules to the front of the module search path.
-]==]
+]]
 
 help( helptext )
 

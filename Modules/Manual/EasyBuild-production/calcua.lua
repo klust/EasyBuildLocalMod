@@ -107,6 +107,7 @@ local system_sourcepath =           pathJoin( install_prefix, 'sources' )
 local system_configdir =            pathJoin( system_prefix,  'config' )
 local system_easyconfigdir =        pathJoin( system_prefix,  'github/UAntwerpen-easyconfigs' )
 local system_buildpath =            pathJoin( '/dev/shm', os.getenv( 'USER' ) )
+local system_tmpdir =               os.getenv( 'VSC_SCRATCH_NODE' )
 local system_installpath =          install_prefix
 --    + The install path for software, were we need to distinguish between
 --      software stacks before calcua/2020b and from calcua/2020b on
@@ -161,6 +162,7 @@ local systen_configfile_stack =   pathJoin( system_configdir, 'production-' .. s
 setenv( 'EASYBUILD_PREFIX',               system_prefix )
 setenv( 'EASYBUILD_SOURCEPATH',           system_sourcepath )
 setenv( 'EASYBUILD_BUILDPATH',            system_buildpath )
+setenv( 'EASYBUILD_TMPDIR',               system_tmpdir )
 setenv( 'EASYBUILD_INSTALLPATH',          system_installpath )
 setenv( 'EASYBUILD_INSTALLPATH_SOFTWARE', system_installpath_software )
 setenv( 'EASYBUILD_INSTALLPATH_MODULES',  system_installpath_modules )
@@ -245,7 +247,7 @@ end
 -- will be shown.
 --
 
-helptext = [==[
+help( [[
 Description
 ===========
 The EasyBuild-production module configures EasyBuild through environment variables
@@ -279,23 +281,22 @@ The following variables should be set by the software stack module:
     as we have used "rome" instead of "zen2".
 
 The following directories and files are used by this module:
-]==]
+  * Directory for EasyConfig files:           ]] .. system_easyconfigdir .. '\n' .. [[
+  * Software installation:                    ]] .. system_installpath_software .. '\n' .. [[
+  * Module files:                             ]] .. system_installpath_modules .. '\n' .. [[
+  * EasyBuild configuration files:            ]] .. system_configdir .. '\n' .. [[
+     - Generic config file:                   ]] .. system_configfile_generic .. '\n' .. [[
+     - Software stack-specific config file:   ]] .. systen_configfile_stack .. '\n' .. [[
+  * Sources of installed packages:            ]] .. system_sourcepath .. '\n' .. [[
+  * Repository of installed EasyConfigs       ]] .. system_repositorypath .. '\n' .. [[
+  * Builds are performed in:                  ]] .. system_buildpath .. '\n' .. [[
+    Don't forget to clean if a build fails!
+  * Temporary directory for logs etc.:        ]] .. system_tmpdir .. '\n' .. [[
+    Don't forget to clean every now and then!
 
-helptext = helptext .. '  * Directory for EasyConfig files:           ' .. system_easyconfigdir .. '\n'
-helptext = helptext .. '  * Software installation:                    ' .. system_installpath_software .. '\n'
-helptext = helptext .. '  * Module files:                             ' .. system_installpath_modules .. '\n'
-helptext = helptext .. '  * EasyBuild configuration files:            ' .. system_configdir .. '\n'
-helptext = helptext .. '     - Generic config file:                   ' .. system_configfile_generic .. '\n'
-helptext = helptext .. '     - Software stack-specific config file:   ' .. systen_configfile_stack .. '\n'
-helptext = helptext .. '  * Sources of installed packages:            ' .. system_sourcepath .. '\n'
-helptext = helptext .. '  * Repository of installed EasyConfigs       ' .. system_repositorypath .. '\n'
-helptext = helptext .. '  * Builds are performed in:                  ' .. system_buildpath .. '\n'
-helptext = helptext .. '    Don\'t forget to clean if a build fails!\n'
-helptext = helptext .. '\nThe following system directories and files are used (if present):\n'
-helptext = helptext .. '  * Generic config file:                      ' .. system_configfile_generic .. '\n'
-helptext = helptext .. '  * Software stack-specific config file:      ' .. systen_configfile_stack .. '\n'
-
-helptext = helptext .. [==[
+The following system directories and files are used (if present):
+  * Generic config file:                      ]] .. system_configfile_generic .. '\n' .. [[
+  * Software stack-specific config file:      ]] .. systen_configfile_stack .. '\n' .. [[
 
 If multiple configuration files are given, they are read in the following order:
   1. System generic configuration file
@@ -315,9 +316,8 @@ of the module in an unexpected configuration would mess up with the system.
 
 The module installation path is added to the MODULEPATH though to ensure that
 newly installed modules will be found immediately by EasyBuild.
-]==]
+]] )
 
-help( helptext )
 
 
 
